@@ -10,6 +10,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       home: HomeScreen(),
     );
   }
@@ -26,9 +27,42 @@ class HomeScreen extends StatelessWidget {
     'Daejeon',
     'Seoul'
   ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Text('PICTORY'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.login),
+            onPressed: () async {
+              final result = await Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => LoginScreen()),
+              );
+
+              // Future.delayed로 딜레이 줘야 context 안정됨
+              if (result == true) {
+                Future.delayed(Duration.zero, () {
+                  showDialog(
+                    context: context,
+                    barrierDismissible: false,
+                    builder: (context) => AlertDialog(
+                      content: Text('로그인 되었습니다',textAlign: TextAlign.center,),
+                    ),
+                  );
+                  Future.delayed(Duration(seconds: 1), () {
+                    Navigator.of(context, rootNavigator: true).pop();
+                  });
+                });
+              }
+            },
+
+          )
+        ],
+
+      ),
       body: SafeArea(
         child: Column(
           children: [
@@ -69,8 +103,53 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
+class LoginScreen extends StatelessWidget {
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('로그인')),
+      body: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            TextField(
+              controller: emailController,
+              decoration: InputDecoration(
+                labelText: '아이디',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            SizedBox(height: 16),
+            TextField(
+              controller: passwordController,
+              obscureText: true,
+              decoration: InputDecoration(
+                labelText: '비밀번호',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context, true);
+                }, // 홈화면으로 되돌아가기
+                child: Text('로그인')
+            )
+
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _CountryCard extends StatelessWidget {
   final String country;
+
   const _CountryCard({required this.country});
 
   @override
@@ -94,6 +173,8 @@ class _CountryCard extends StatelessWidget {
     );
   }
 }
+
+
 
 // 두 번째 화면
 class TravelListScreen extends StatelessWidget {
@@ -211,7 +292,6 @@ class _TravelSelectScreenState extends State<TravelSelectScreen> {
     );
   }
 }
-
 
 // void main() {
 //   runApp(const Homepage());
