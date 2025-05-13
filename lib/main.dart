@@ -73,16 +73,17 @@ class _HomeScreenState extends State<HomeScreen> {
             ],
           ),
         ),
-        Card(
-          shadowColor: Colors.transparent,
-          margin: const EdgeInsets.all(8.0),
-          child: SizedBox.expand(
-            child: Center(
-                child: Text(
-              'AI EDIT SERVICE is making ...',
-            )),
-          ),
-        ),
+        TravelListScreen(),
+        // Card(
+        //   shadowColor: Colors.transparent,
+        //   margin: const EdgeInsets.all(8.0),
+        //   child: SizedBox.expand(
+        //     child: Center(
+        //         child: Text(
+        //       'AI EDIT SERVICE is making ...',
+        //     )),
+        //   ),
+        // ),
       ][currentpageIndex],
       bottomNavigationBar: NavigationBar(
           onDestinationSelected: (int index) {
@@ -100,17 +101,6 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             NavigationDestination(icon: Icon(Icons.edit_rounded), label: "AI"),
           ]),
-      // 오른쪽 아래 버튼 (예: 여행 리스트로 이동)
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => TravelListScreen()),
-          );
-        },
-        child: Icon(Icons.list),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 }
