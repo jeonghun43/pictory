@@ -71,42 +71,60 @@ class _HomeScreenState extends State<HomeScreen> {
           )
         ],
       ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            SizedBox(height: 40),
-            Text(
-              '당신의 여행기록을\nAI가 정리했어요!',
-              style: TextStyle(fontSize: 28, fontStyle: FontStyle.italic),
-              textAlign: TextAlign.center,
-            ),
-            SizedBox(height: 40),
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              padding: EdgeInsets.symmetric(horizontal: 16),
-              child: Row(
-                children: countries
-                    .map((country) => Padding(
-                          padding: const EdgeInsets.only(right: 16),
-                          child: _CountryCard(country: country),
-                        ))
-                    .toList(),
-              ),
-            ),
-          ],
+      body: <Widget>[
+        Card(
+          shadowColor: Colors.transparent,
+          margin: const EdgeInsets.all(8.0),
+          child: SizedBox.expand(
+            child: Center(
+                child: Text(
+              'Recummend trip area is making ...',
+            )),
+          ),
         ),
-      ),
-      // 오른쪽 아래 버튼 (예: 여행 리스트로 이동)
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => TravelListScreen()),
-          );
-        },
-        child: Icon(Icons.list),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+        SafeArea(
+          child: Column(
+            children: [
+              SizedBox(height: 40),
+              Text(
+                '당신의 여행기록을\nAI가 정리했어요!',
+                style: TextStyle(fontSize: 28, fontStyle: FontStyle.italic),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: 40),
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                padding: EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
+                  children: countries
+                      .map((country) => Padding(
+                            padding: const EdgeInsets.only(right: 16),
+                            child: _CountryCard(country: country),
+                          ))
+                      .toList(),
+                ),
+              ),
+            ],
+          ),
+        ),
+        TravelListScreen(),
+      ][currentpageIndex],
+      bottomNavigationBar: NavigationBar(
+          onDestinationSelected: (int index) {
+            setState(() {
+              currentpageIndex = index;
+            });
+          },
+          indicatorColor: Colors.lightBlue.shade100,
+          selectedIndex: currentpageIndex,
+          destinations: const <Widget>[
+            NavigationDestination(icon: Icon(Icons.flight), label: "Recummend"),
+            NavigationDestination(
+              icon: Icon(Icons.home),
+              label: "Gallerys",
+            ),
+            NavigationDestination(icon: Icon(Icons.edit_rounded), label: "AI"),
+          ]),
     );
   }
 }
@@ -182,14 +200,14 @@ class _CountryCard extends StatelessWidget {
 
 // 두 번째 화면
 class TravelListScreen extends StatelessWidget {
-  final List<String> countries = [
-    'France',
-    'Italy',
-    'Switzerland',
-    'England',
-    'Japan',
-    'USA',
-    'Spain'
+  final List<Map<String, String>> trips = [
+    {'country': 'France', 'date': '22.12.03 ~ 22.12.16'},
+    {'country': 'Italy', 'date': '23.01.23 ~ 23.01.30'},
+    {'country': 'Switzerland', 'date': '23.07.01 ~ 23.07.15'},
+    {'country': 'England', 'date': '23.08.15 ~ 23.08.31'},
+    {'country': 'Japan', 'date': '24.01.17 ~ 24.01.23'},
+    {'country': 'USA', 'date': '24.02.03 ~ 24.02.16'},
+    {'country': 'Spain', 'date': '24.12.25 ~ 24.12.31'},
   ];
 
   @override
@@ -197,18 +215,19 @@ class TravelListScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: Text('AI EDITER')),
       body: ListView(
-        children: countries.map((country) {
+        physics: BouncingScrollPhysics(),
+        children: trips.map((trip) {
           return Card(
             color: Colors.cyan[100],
             child: ListTile(
               leading:
                   Container(width: 40, height: 40, color: Colors.grey[300]),
               title: Text(
-                country,
+                trip['country']!,
                 style: TextStyle(
                     fontStyle: FontStyle.italic, fontWeight: FontWeight.bold),
               ),
-              subtitle: Text('24.12.03 ~ 24.12.16'),
+              subtitle: Text(trip['date']!),
             ),
           );
         }).toList(),
@@ -404,85 +423,3 @@ class _TravelSelectScreenState extends State<TravelSelectScreen> {
     );
   }
 }
-
-
-// void main() {
-//   runApp(const Homepage());
-// }
-
-// class Homepage extends StatelessWidget {
-//   const Homepage({super.key});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return const MaterialApp(
-//       home: HomeScreen(),
-//     );
-//   }
-// }
-
-// class HomeScreen extends StatefulWidget {
-//   const HomeScreen({super.key});
-
-//   @override
-//   State<HomeScreen> createState() => _HomepageState();
-// }
-
-// class _HomepageState extends State<HomeScreen> {
-//   final countries = [
-//     'France',
-//     'Italy',
-//     'England',
-//     'USA',
-//     'BlaBla1',
-//     'BlaBla2',
-//     'BlaBla3'
-//   ];
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       body: Column(
-//         children: [
-//           Text("hello"),
-//           SizedBox(
-//             height: 400,
-//             child: ListView.builder(
-//               // shrinkWrap: true,
-//               scrollDirection: Axis.horizontal,
-//               itemCount: countries.length,
-//               itemBuilder: (context, index) {
-//                 return CountryCard(
-//                   country: countries[index],
-//                 );
-//               },
-//             ),
-//           ),
-//           Text("world!"),
-//         ],
-//       ),
-//     );
-//   }
-// }
-
-// class CountryCard extends StatelessWidget {
-//   final String country;
-//   const CountryCard({super.key, required this.country});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Container(
-//       height: 150,
-//       width: 150,
-//       decoration: BoxDecoration(
-//           color: Colors.grey, borderRadius: BorderRadius.circular(0.5)),
-//       child: Column(
-//         children: [
-//           SizedBox(),
-//           Text(
-//             country,
-//           )
-//         ],
-//       ),
-//     );
-//   }
-// }
