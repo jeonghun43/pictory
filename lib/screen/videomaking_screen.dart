@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pictory/screen/videoplay.dart';
 
 class VideoMaking extends StatefulWidget {
   String style;
@@ -20,7 +21,20 @@ class _VideoMakingState extends State<VideoMaking> {
       ),
       body: Center(
           child: Column(
-        children: [Text("${widget.style} 스타일로 영상 제작중 . . .")],
+        children: [
+          Text("${widget.style} 스타일로 영상 제작중 . . ."),
+          ElevatedButton(
+              onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => VideoPreviewPage(
+                        thumbnailPath: "images/france1.jpg",
+                        videoUrl: "assets/ex.mp4",
+                      ),
+                    ),
+                  ),
+              child: Text("완료")),
+        ],
       )),
     );
   }

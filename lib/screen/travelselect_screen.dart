@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pictory/screen/videostyle_screen.dart';
+import 'package:pictory/screen/travellist_screen.dart';
 
 // 세 번째 화면 (선택 모드)
 class TravelSelectScreen extends StatefulWidget {
@@ -8,15 +9,7 @@ class TravelSelectScreen extends StatefulWidget {
 }
 
 class _TravelSelectScreenState extends State<TravelSelectScreen> {
-  final List<String> countries = [
-    'France',
-    'Italy',
-    'Switzerland',
-    'England',
-    'Japan',
-    'USA',
-    'Spain'
-  ];
+  List<Map<String, String>> trips = TravelListScreen.trips;
   final Set<int> selected = {};
 
   @override
@@ -24,7 +17,7 @@ class _TravelSelectScreenState extends State<TravelSelectScreen> {
     return Scaffold(
       appBar: AppBar(title: Text('AI EDITER')),
       body: ListView.builder(
-        itemCount: countries.length,
+        itemCount: trips.length,
         itemBuilder: (context, idx) {
           return Card(
             color: selected.contains(idx)
@@ -34,7 +27,7 @@ class _TravelSelectScreenState extends State<TravelSelectScreen> {
               leading:
                   Container(width: 40, height: 40, color: Colors.grey[300]),
               title: Text(
-                countries[idx],
+                trips[idx]['country'] ?? '',
                 style: TextStyle(
                     fontStyle: FontStyle.italic, fontWeight: FontWeight.bold),
               ),

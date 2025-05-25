@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:pictory/screen/travelselect_screen.dart';
 
 // 두 번째 화면
-class TravelListScreen extends StatelessWidget {
-  final List<Map<String, String>> trips = [
+class TravelListScreen extends StatefulWidget {
+  static List<Map<String, String>> trips = [
     {'country': 'France', 'date': '22.12.03 ~ 22.12.16'},
     {'country': 'Italy', 'date': '23.01.23 ~ 23.01.30'},
     {'country': 'Switzerland', 'date': '23.07.01 ~ 23.07.15'},
@@ -12,14 +12,19 @@ class TravelListScreen extends StatelessWidget {
     {'country': 'USA', 'date': '24.02.03 ~ 24.02.16'},
     {'country': 'Spain', 'date': '24.12.25 ~ 24.12.31'},
   ];
+  TravelListScreen({super.key});
+  @override
+  State<TravelListScreen> createState() => _TravelListScreenState();
+}
 
+class _TravelListScreenState extends State<TravelListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('AI EDITER')),
       body: ListView(
         physics: BouncingScrollPhysics(),
-        children: trips.map((trip) {
+        children: TravelListScreen.trips.map((trip) {
           return Card(
             color: Colors.cyan[100],
             child: ListTile(
