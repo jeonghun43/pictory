@@ -3,7 +3,6 @@ import 'package:pictory/screen/albumlist_screen.dart';
 import 'package:pictory/screen/login_screen.dart';
 import 'package:pictory/screen/travellist_screen.dart';
 import 'package:pictory/screen/triprecumend_screen.dart';
-import 'package:pictory/screen/videostyle_screen.dart';
 
 void main() {
   runApp(MyApp());
