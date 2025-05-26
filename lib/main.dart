@@ -20,70 +20,52 @@ class MyApp extends StatelessWidget {
 
 // 첫 번째 화면
 class HomeScreen extends StatefulWidget {
+  final int initialIndex;
+
+  const HomeScreen({this.initialIndex = 0, super.key});
+
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  int currentpageIndex = 0;
+  late int currentpageIndex;
+  final List<Widget> _pages = [
+    const TripRecumendPage(),
+    AlbumList(),
+    TravelListScreen(),
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    currentpageIndex = widget.initialIndex;
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('PICTORY'),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.login),
-            onPressed: () async {
-              final result = await Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => LoginScreen()),
-              );
-
-              // Future.delayed로 딜레이 줘야 context 안정됨
-              if (result == true) {
-                Future.delayed(Duration.zero, () {
-                  showDialog(
-                    context: context,
-                    barrierDismissible: false,
-                    builder: (context) => AlertDialog(
-                      content: Text(
-                        '로그인 되었습니다',
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  );
-                  Future.delayed(Duration(seconds: 1), () {
-                    Navigator.of(context, rootNavigator: true).pop();
-                  });
-                });
-              }
-            },
-          )
+      body: IndexedStack(
+        index: currentpageIndex,
+        children: _pages,
+      ),
+      bottomNavigationBar: NavigationBar(
+        onDestinationSelected: (int index) {
+          setState(() {
+            currentpageIndex = index;
+          });
+        },
+        indicatorColor: Colors.lightBlue.shade100,
+        selectedIndex: currentpageIndex,
+        destinations: const <Widget>[
+          NavigationDestination(icon: Icon(Icons.flight), label: "Recummend"),
+          NavigationDestination(
+            icon: Icon(Icons.home),
+            label: "Gallerys",
+          ),
+          NavigationDestination(icon: Icon(Icons.edit_rounded), label: "AI"),
         ],
       ),
-      body: <Widget>[
-        TripRecumendPage(),
-        AlbumList(),
-        TravelListScreen(),
-      ][currentpageIndex],
-      bottomNavigationBar: NavigationBar(
-          onDestinationSelected: (int index) {
-            setState(() {
-              currentpageIndex = index;
-            });
-          },
-          indicatorColor: Colors.lightBlue.shade100,
-          selectedIndex: currentpageIndex,
-          destinations: const <Widget>[
-            NavigationDestination(icon: Icon(Icons.flight), label: "Recummend"),
-            NavigationDestination(
-              icon: Icon(Icons.home),
-              label: "Gallerys",
-            ),
-            NavigationDestination(icon: Icon(Icons.edit_rounded), label: "AI"),
-          ]),
     );
   }
 }

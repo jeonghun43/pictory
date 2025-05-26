@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pictory/screen/travellist_screen.dart';
+import 'package:pictory/main.dart';
 
 class ContentNamePage extends StatefulWidget {
   const ContentNamePage({super.key});
@@ -51,14 +52,17 @@ class _ContentNamePageState extends State<ContentNamePage> {
                   ElevatedButton(
                     onPressed: () {
                       TravelListScreen.trips.insert(0, {
-                        'country': _controller.text,
+                        'country': _controller.text + " VIDEO BY AI",
                         'date': '20250527', // 혹은 원하는 기본값
                       });
                       if (_controller.text.trim().isNotEmpty) {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => TravelListScreen()));
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => HomeScreen(initialIndex: 2),
+                          ),
+                          (route) => false,
+                        );
                       }
                     },
                     child: const Text('완료'),

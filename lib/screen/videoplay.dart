@@ -135,101 +135,126 @@ class _FullScreenVideoPageState extends State<FullScreenVideoPage> {
     return Scaffold(
       backgroundColor: Colors.black,
       body: SafeArea(
-        child: Stack(
+        child: Column(
           children: [
-            Center(
+            // 상단 닫기 버튼
+            Align(
+              alignment: Alignment.topLeft,
+              child: IconButton(
+                icon: const Icon(Icons.close, color: Colors.white, size: 32),
+                onPressed: () => Navigator.pop(context),
+              ),
+            ),
+            // 비디오 플레이어
+            Expanded(
               child: FutureBuilder(
                 future: _initializeVideoPlayerFuture,
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.done) {
-                    return Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        AspectRatio(
-                          aspectRatio: _controller.value.aspectRatio,
-                          child: VideoPlayer(_controller),
-                        ),
-                        Positioned(
-                          bottom: 40,
-                          child: VideoProgressIndicator(
-                            _controller,
-                            allowScrubbing: true,
-                            colors: VideoProgressColors(
-                              playedColor: Colors.white,
-                              backgroundColor: Colors.white24,
-                              bufferedColor: Colors.white54,
+                    return Center(
+                      child: Container(
+                        constraints: const BoxConstraints.expand(),
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            AspectRatio(
+                              aspectRatio: _controller.value.aspectRatio,
+                              child: VideoPlayer(_controller),
                             ),
-                          ),
+                            if (!_isVideoEnded)
+                              Align(
+                                alignment: Alignment.bottomCenter,
+                                child: Padding(
+                                  padding: const EdgeInsets.only(bottom: 40),
+                                  child: VideoProgressIndicator(
+                                    _controller,
+                                    allowScrubbing: true,
+                                    colors: VideoProgressColors(
+                                      playedColor: Colors.white,
+                                      backgroundColor: Colors.white24,
+                                      bufferedColor: Colors.white54,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            if (!_isVideoEnded)
+                              Align(
+                                alignment: Alignment.bottomRight,
+                                child: Padding(
+                                  padding: const EdgeInsets.only(
+                                      bottom: 40, right: 40),
+                                  child: Material(
+                                    color: Colors.transparent,
+                                    child: IconButton(
+                                      icon: Icon(
+                                        _controller.value.isPlaying
+                                            ? Icons.pause
+                                            : Icons.play_arrow,
+                                        color: Colors.white,
+                                        size: 40,
+                                      ),
+                                      onPressed: () {
+                                        setState(() {
+                                          if (_controller.value.isPlaying) {
+                                            _controller.pause();
+                                          } else {
+                                            if (_isVideoEnded) {
+                                              _controller.seekTo(Duration.zero);
+                                              _isVideoEnded = false;
+                                            }
+                                            _controller.play();
+                                          }
+                                        });
+                                      },
+                                    ),
+                                  ),
+                                ),
+                              ),
+                          ],
                         ),
-                        Positioned(
-                          bottom: 40,
-                          right: 40,
-                          child: IconButton(
-                            icon: Icon(
-                              _controller.value.isPlaying
-                                  ? Icons.pause
-                                  : Icons.play_arrow,
-                              color: Colors.white,
-                              size: 40,
-                            ),
-                            onPressed: () {
-                              setState(() {
-                                if (_controller.value.isPlaying) {
-                                  _controller.pause();
-                                } else {
-                                  if (_isVideoEnded) {
-                                    _controller.seekTo(Duration.zero);
-                                    _isVideoEnded = false;
-                                  }
-                                  _controller.play();
-                                }
-                              });
-                            },
-                          ),
-                        ),
-                        Positioned(
-                          top: 40,
-                          left: 20,
-                          child: IconButton(
-                            icon: const Icon(Icons.close,
-                                color: Colors.white, size: 32),
-                            onPressed: () => Navigator.pop(context),
-                          ),
-                        ),
-                      ],
+                      ),
                     );
                   } else {
-                    return const CircularProgressIndicator(color: Colors.white);
+                    return const Center(
+                      child: CircularProgressIndicator(color: Colors.white),
+                    );
                   }
                 },
               ),
             ),
-            // 영상이 끝났을 때만 save 버튼 표시
+            // Save 버튼을 Column의 마지막 자식으로 배치
             if (_isVideoEnded)
-              Positioned(
-                bottom: 40,
-                left: 0,
-                right: 0,
-                child: Center(
-                  child: ElevatedButton(
-                    onPressed: () {
-                      // 저장 기능 구현
-                      Navigator.push(
+              Padding(
+                padding: const EdgeInsets.only(bottom: 40, top: 20),
+                child: SizedBox(
+                  width: 200,
+                  height: 50,
+                  child: Material(
+                    color: Colors.transparent,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => ContentNamePage()));
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green[400],
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
+                            builder: (context) => const ContentNamePage(),
+                          ),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green[400],
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(25),
+                        ),
+                        elevation: 8,
                       ),
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 40, vertical: 16),
-                    ),
-                    child: const Text(
-                      'save',
-                      style: TextStyle(color: Colors.white, fontSize: 18),
+                      child: const Text(
+                        'Save',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
                   ),
                 ),
