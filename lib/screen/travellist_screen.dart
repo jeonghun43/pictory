@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:pictory/data/world.dart';
-import 'package:pictory/screen/travelselect_screen.dart';
 import 'package:pictory/screen/videostyle_screen.dart';
 
 // 두 번째 화면
