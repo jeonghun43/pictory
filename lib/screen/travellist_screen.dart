@@ -176,19 +176,33 @@ class _TravelListScreenState extends State<TravelListScreen> {
           Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
                 colors: [
-                  Colors.orange.shade300,
-                  Colors.pink.shade200,
+                  Color(0xFF614385), // 진한 보라색
+                  Color(0xFF516395), // 깊은 청색
                 ],
+                stops: const [0.0, 1.0],
               ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 10,
+                  spreadRadius: 0,
+                ),
+              ],
             ),
             child: SafeArea(
               child: Column(
                 children: [
                   AppBar(
-                    title: const Text('AI EDITER'),
+                    title: const Text(
+                      'AI EDITER',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 1.2,
+                      ),
+                    ),
                     backgroundColor: Colors.transparent,
                     elevation: 0,
                   ),

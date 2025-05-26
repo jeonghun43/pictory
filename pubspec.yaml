@@ -67,6 +67,18 @@ flutter:
     - images/
     - assets/
     - assets/config/
+    - images/sunset_clouds.jpg
+    - images/france1.jpg
+    - images/france2.jpg
+    - images/vintage.jpg
+    - images/film.jpg
+    - images/nocolor.jpg
+    - images/minecraft.jpg
+    - images/jingyeok.png
+    - images/emotional.png
+    - images/zbry.png
+    - images/generative.png
+    # - assets/images/google_logo.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

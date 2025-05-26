@@ -45,6 +45,19 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => LoginScreen()),
+            );
+          },
+          icon: Icon(
+            Icons.login,
+          ),
+        ),
+      ),
       body: IndexedStack(
         index: currentpageIndex,
         children: _pages,
