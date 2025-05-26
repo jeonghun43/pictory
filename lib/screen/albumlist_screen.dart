@@ -46,6 +46,33 @@ class AlbumList extends StatefulWidget {
 
 class _AlbumListState extends State<AlbumList> {
   List<String> countries = World.trips.map((trip) => trip['country']!).toList();
+  List<String> filteredCountries = [];
+  final TextEditingController _searchController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    filteredCountries = List.from(countries);
+  }
+
+  void _filterCountries(String query) {
+    setState(() {
+      if (query.isEmpty) {
+        filteredCountries = List.from(countries);
+      } else {
+        filteredCountries = countries
+            .where((country) =>
+                country.toLowerCase().contains(query.toLowerCase()))
+            .toList();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   // 여행지별 기본 이미지 매핑
   final Map<String, String> defaultImages = {
@@ -66,9 +93,129 @@ class _AlbumListState extends State<AlbumList> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Column(
+    return Scaffold(
+      body: Column(
         children: [
+          Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color(0xFF8B5CF6),
+                  Color(0xFF7C3AED),
+                  Color(0xFF4C1D95),
+                ],
+                stops: const [0.0, 0.5, 1.0],
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 10,
+                  spreadRadius: 0,
+                ),
+              ],
+            ),
+            child: SafeArea(
+              child: Column(
+                children: [
+                  AppBar(
+                    title: const Text(
+                      '앨범',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 1.2,
+                        color: Colors.white,
+                      ),
+                    ),
+                    backgroundColor: Colors.transparent,
+                    elevation: 0,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(30),
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            Colors.white,
+                            Colors.white,
+                            const Color(0xFFF8F9FA),
+                          ],
+                          stops: const [0.0, 0.8, 1.0],
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey,
+                            blurRadius: 0.5,
+                            offset: const Offset(-1, -1),
+                            spreadRadius: 1,
+                          ),
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.3),
+                            blurRadius: 0.3,
+                            offset: const Offset(1, 1),
+                            spreadRadius: 1,
+                          ),
+                        ],
+                      ),
+                      child: TextField(
+                        controller: _searchController,
+                        onChanged: _filterCountries,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          color: Colors.black87,
+                        ),
+                        decoration: InputDecoration(
+                          hintText: '나라 이름으로 검색...',
+                          hintStyle: TextStyle(
+                            color: Colors.grey[600],
+                            fontSize: 16,
+                          ),
+                          filled: false,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(30),
+                            borderSide: BorderSide.none,
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(30),
+                            borderSide: BorderSide.none,
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(30),
+                            borderSide: BorderSide(
+                              color: Color(0xFF614385),
+                              width: 2,
+                            ),
+                          ),
+                          prefixIcon: Icon(
+                            Icons.search,
+                            color: Colors.grey[400],
+                          ),
+                          suffixIcon: _searchController.text.isNotEmpty
+                              ? IconButton(
+                                  icon: Icon(Icons.clear,
+                                      color: Colors.grey[400]),
+                                  onPressed: () {
+                                    _searchController.clear();
+                                    _filterCountries('');
+                                  },
+                                )
+                              : null,
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 16,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
           const SizedBox(height: 40),
           const Text(
             '당신의 여행기록을\nAI가 정리했어요!',
@@ -76,32 +223,34 @@ class _AlbumListState extends State<AlbumList> {
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 40),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Row(
-              children: countries
-                  .map((country) => Padding(
-                        padding: const EdgeInsets.only(right: 16),
-                        child: GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => CountryPhotoListPage(
-                                  country: country,
-                                  photoList: countryPhotos[country] ?? [],
+          Expanded(
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Row(
+                children: filteredCountries
+                    .map((country) => Padding(
+                          padding: const EdgeInsets.only(right: 16),
+                          child: GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => CountryPhotoListPage(
+                                    country: country,
+                                    photoList: countryPhotos[country] ?? [],
+                                  ),
                                 ),
-                              ),
-                            );
-                          },
-                          child: CountryCard(
-                            country: country,
-                            imageUrl: getDefaultImage(country),
+                              );
+                            },
+                            child: CountryCard(
+                              country: country,
+                              imageUrl: getDefaultImage(country),
+                            ),
                           ),
-                        ),
-                      ))
-                  .toList(),
+                        ))
+                    .toList(),
+              ),
             ),
           ),
         ],

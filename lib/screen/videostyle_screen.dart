@@ -46,28 +46,69 @@ class StyleSelectorPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('AI EDITER'),
+        title: const Text(
+          'AI EDITER',
+          style: TextStyle(
+            fontWeight: FontWeight.w600,
+            letterSpacing: 1.2,
+            color: Colors.white,
+          ),
+        ),
         centerTitle: false,
         elevation: 0,
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Color(0xFF8B5CF6), // 밝은 보라색
+                Color(0xFF7C3AED), // 중간 보라색
+                Color(0xFF4C1D95), // 진한 보라색
+              ],
+              stops: const [0.0, 0.5, 1.0],
+            ),
+          ),
+        ),
+        backgroundColor: Colors.transparent,
       ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 8),
-            const Text(
-              '어떤 스타일을\n원하시나요?',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
+      body: Column(
+        children: [
+          Container(
+            width: double.infinity,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color(0xFF8B5CF6), // 밝은 보라색
+                  Color(0xFF7C3AED), // 중간 보라색
+                  Color(0xFF4C1D95), // 진한 보라색
+                ],
+                stops: const [0.0, 0.5, 1.0],
               ),
             ),
-            const SizedBox(height: 24),
-            Expanded(
-              // 스크롤 가능한 그리드 리스트
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    '어떤 스타일을\n원하시나요?',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Expanded(
+            child: Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
               child: GridView.builder(
                 itemCount: styles.length,
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -111,8 +152,8 @@ class StyleSelectorPage extends StatelessWidget {
                 },
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

@@ -13,11 +13,12 @@ class TravelListScreen extends StatefulWidget {
 class _TravelListScreenState extends State<TravelListScreen> {
   final TextEditingController _searchController = TextEditingController();
   List<Map<String, String>> filteredTrips = [];
+  Set<int> selectedIndices = {}; // 선택된 아이템들의 인덱스를 저장
 
   @override
   void initState() {
     super.initState();
-    filteredTrips = TravelListScreen.trips;
+    filteredTrips = List.from(TravelListScreen.trips);
   }
 
   void _filterTrips(String query) {
@@ -33,118 +34,338 @@ class _TravelListScreenState extends State<TravelListScreen> {
     });
   }
 
+  // 아이템 선택 토글 함수
+  void _toggleSelection(int index) {
+    setState(() {
+      if (selectedIndices.contains(index)) {
+        selectedIndices.remove(index);
+      } else {
+        selectedIndices.add(index);
+      }
+    });
+  }
+
+  // 선택된 아이템들로 비디오 만들기
+  void _createVideoWithSelected() {
+    List<Map<String, String>> selectedTrips =
+        selectedIndices.map((index) => filteredTrips[index]).toList();
+
+    // 첫 번째 선택된 아이템으로 _onCountrySelect 실행
+    if (selectedTrips.isNotEmpty) {
+      _onCountrySelect(context, selectedTrips[0]);
+    }
+
+    // 선택 초기화
+    setState(() {
+      selectedIndices.clear();
+    });
+  }
+
   // 나라 선택 시 실행될 함수
   void _onCountrySelect(
       BuildContext context, Map<String, String> selectedTrip) async {
-    // TODO: 여기에 실제 구현 코드 추가
+    // 선택된 모든 나라 이름 가져오기
+    List<String> selectedCountries = selectedIndices
+        .map((index) => filteredTrips[index]['country']!)
+        .toList();
+    String countriesText = selectedCountries.join(', ');
 
     // [1] 로딩 중 Alert (2초)
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: const [
-            CircularProgressIndicator(),
-            SizedBox(height: 20),
-            Text(
-              'AI가\n잘나온 사진을\n 선별 중!',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 18),
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxWidth: MediaQuery.of(context).size.width * 0.8,
+            minWidth: 280,
+          ),
+          child: Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color(0xFF8B5CF6), // 밝은 보라색
+                  Color(0xFF7C3AED), // 중간 보라색
+                  Color(0xFF4C1D95), // 진한 보라색
+                ],
+                stops: const [0.0, 0.5, 1.0],
+              ),
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.2),
+                  blurRadius: 10,
+                  spreadRadius: 2,
+                ),
+              ],
             ),
-          ],
+            child: Stack(
+              clipBehavior: Clip.none,
+              alignment: Alignment.center,
+              children: [
+                // 산 모양 배경
+                Positioned(
+                  bottom: -24,
+                  left: -24,
+                  right: -24,
+                  child: ClipPath(
+                    clipper: MountainClipper(),
+                    child: Container(
+                      height: 120,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.07),
+                      ),
+                    ),
+                  ),
+                ),
+                // 컨텐츠
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    ),
+                    const SizedBox(height: 24),
+                    Text(
+                      '$countriesText에서 찍은 것 중\nAI가 잘 나온 사진을\n선별 중!',
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        color: Colors.white,
+                        height: 1.5,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
 
-    await Future.delayed(Duration(seconds: 2));
-    Navigator.of(context, rootNavigator: true).pop(); // 닫기
+    await Future.delayed(Duration(seconds: 3));
+    Navigator.of(context, rootNavigator: true).pop();
 
     // [2] 두 번째 메시지 Alert (2초)
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => const AlertDialog(
-        content: Text(
-          'AI가 사진을\n다 골랐어요!',
-          textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 18),
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxWidth: MediaQuery.of(context).size.width * 0.8,
+            minWidth: 280,
+          ),
+          child: Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color(0xFF8B5CF6), // 밝은 보라색
+                  Color(0xFF7C3AED), // 중간 보라색
+                  Color(0xFF4C1D95), // 진한 보라색
+                ],
+                stops: const [0.0, 0.5, 1.0],
+              ),
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.2),
+                  blurRadius: 10,
+                  spreadRadius: 2,
+                ),
+              ],
+            ),
+            child: Stack(
+              clipBehavior: Clip.none,
+              alignment: Alignment.center,
+              children: [
+                // 산 모양 배경
+                Positioned(
+                  bottom: -24,
+                  left: -24,
+                  right: -24,
+                  child: ClipPath(
+                    clipper: MountainClipper(),
+                    child: Container(
+                      height: 120,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.07),
+                      ),
+                    ),
+                  ),
+                ),
+                // 컨텐츠
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.check_circle_outline,
+                      color: Colors.white,
+                      size: 48,
+                    ),
+                    const SizedBox(height: 16),
+                    const Text(
+                      'AI가 사진을\n다 골랐어요!',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 18,
+                        color: Colors.white,
+                        height: 1.5,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
 
-    await Future.delayed(Duration(seconds: 1));
+    await Future.delayed(Duration(seconds: 2));
     Navigator.of(context, rootNavigator: true).pop();
 
     // [3] Yes/No 선택 Alert
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => AlertDialog(
+      builder: (context) => Dialog(
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(20),
         ),
-        contentPadding: const EdgeInsets.all(24),
-        content: SizedBox(
-          width: 250,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                '컨텐츠로\n만들어볼까요?',
-                textAlign: TextAlign.start,
-                style: TextStyle(fontSize: 22),
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxWidth: MediaQuery.of(context).size.width * 0.8,
+            minWidth: 280,
+          ),
+          child: Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color(0xFF8B5CF6), // 밝은 보라색
+                  Color(0xFF7C3AED), // 중간 보라색
+                  Color(0xFF4C1D95), // 진한 보라색
+                ],
+                stops: const [0.0, 0.5, 1.0],
               ),
-              const SizedBox(height: 32),
-              Align(
-                alignment: Alignment.bottomRight,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    ElevatedButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => StyleSelectorPage()));
-                        // YES 동작
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.lightBlueAccent,
-                        foregroundColor: Colors.white,
-                        shape: const StadiumBorder(),
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 24, vertical: 10),
-                      ),
-                      child: const Text(
-                        'YES',
-                        style: TextStyle(fontStyle: FontStyle.italic),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    ElevatedButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.redAccent.shade100,
-                        foregroundColor: Colors.white,
-                        shape: const StadiumBorder(),
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 24, vertical: 10),
-                      ),
-                      child: const Text(
-                        'NO',
-                        style: TextStyle(fontStyle: FontStyle.italic),
-                      ),
-                    ),
-                  ],
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.2),
+                  blurRadius: 10,
+                  spreadRadius: 2,
                 ),
-              ),
-            ],
+              ],
+            ),
+            child: Stack(
+              clipBehavior: Clip.none,
+              alignment: Alignment.center,
+              children: [
+                // 산 모양 배경
+                Positioned(
+                  bottom: -24,
+                  left: -24,
+                  right: -24,
+                  child: ClipPath(
+                    clipper: MountainClipper(),
+                    child: Container(
+                      height: 120,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.07),
+                      ),
+                    ),
+                  ),
+                ),
+                // 컨텐츠
+                SizedBox(
+                  width: 250,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Text(
+                        '컨텐츠로\n만들어볼까요?',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 22,
+                          color: Colors.white,
+                          height: 1.3,
+                        ),
+                      ),
+                      const SizedBox(height: 32),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          ElevatedButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => StyleSelectorPage(),
+                                ),
+                              );
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.white,
+                              foregroundColor: Color(0xFF614385),
+                              shape: const StadiumBorder(),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 24,
+                                vertical: 12,
+                              ),
+                              elevation: 0,
+                            ),
+                            child: const Text(
+                              'YES',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                            style: TextButton.styleFrom(
+                              foregroundColor: Colors.white,
+                              shape: const StadiumBorder(),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 24,
+                                vertical: 12,
+                              ),
+                            ),
+                            child: const Text(
+                              'NO',
+                              style: TextStyle(
+                                fontSize: 16,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -168,6 +389,61 @@ class _TravelListScreenState extends State<TravelListScreen> {
         'https://images.unsplash.com/photo-1488646953014-85cb44e25828';
   }
 
+  // 삭제 함수 추가
+  void _deleteTrip(int index) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: const Text('삭제 확인'),
+          content: const Text('이 여행 기록을 삭제하시겠습니까?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(
+                '취소',
+                style: TextStyle(color: Colors.grey[600]),
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                setState(() {
+                  String countryToDelete = filteredTrips[index]['country']!;
+                  // 원본 리스트에서 삭제
+                  TravelListScreen.trips.removeWhere(
+                      (trip) => trip['country'] == countryToDelete);
+                  // 필터된 리스트에서도 삭제
+                  filteredTrips.removeAt(index);
+                });
+                Navigator.of(context).pop();
+
+                // 삭제 완료 스낵바 표시
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: const Text('여행 기록이 삭제되었습니다'),
+                    behavior: SnackBarBehavior.floating,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    margin: const EdgeInsets.all(16),
+                    duration: const Duration(seconds: 2),
+                  ),
+                );
+              },
+              child: const Text(
+                '삭제',
+                style: TextStyle(color: Colors.red),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -179,10 +455,11 @@ class _TravelListScreenState extends State<TravelListScreen> {
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  Color(0xFF614385), // 진한 보라색
-                  Color(0xFF516395), // 깊은 청색
+                  Color(0xFF8B5CF6), // 밝은 보라색
+                  Color(0xFF7C3AED), // 중간 보라색
+                  Color(0xFF4C1D95), // 진한 보라색
                 ],
-                stops: const [0.0, 1.0],
+                stops: const [0.0, 0.5, 1.0],
               ),
               boxShadow: [
                 BoxShadow(
@@ -201,10 +478,43 @@ class _TravelListScreenState extends State<TravelListScreen> {
                       style: TextStyle(
                         fontWeight: FontWeight.w600,
                         letterSpacing: 1.2,
+                        color: Colors.white,
                       ),
                     ),
                     backgroundColor: Colors.transparent,
                     elevation: 0,
+                    actions: [
+                      if (selectedIndices.isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.only(right: 16.0),
+                          child: ElevatedButton.icon(
+                            onPressed: _createVideoWithSelected,
+                            icon: const Icon(Icons.photo_library),
+                            label: const Text('앨범에서 사진 선별'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.white,
+                              foregroundColor: Color(0xFF614385),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        "앨범을 선택하세요(다중 선택 가능) AI가 잘 나온 사진을 선별해드립니다",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
                   ),
                   Padding(
                     padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
@@ -303,56 +613,93 @@ class _TravelListScreenState extends State<TravelListScreen> {
               itemBuilder: (context, index) {
                 final trip = filteredTrips[index];
                 return GestureDetector(
-                  onTap: () => _onCountrySelect(context, trip),
-                  child: Padding(
-                    padding: const EdgeInsets.only(bottom: 16),
-                    child: Container(
-                      height: 160,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(20),
-                        image: DecorationImage(
-                          image:
-                              NetworkImage(getDefaultImage(trip['country']!)),
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(20),
-                          gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [
-                              Colors.transparent,
-                              Colors.black.withOpacity(0.7),
-                            ],
+                  onTap: () => _toggleSelection(index), // 선택 토글로 변경
+                  child: Stack(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 16),
+                        child: Container(
+                          width: MediaQuery.of(context).size.width,
+                          height: 160,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(20),
+                            border: selectedIndices.contains(index)
+                                ? Border.all(color: Color(0xFF8B5CF6), width: 3)
+                                : null,
+                            image: DecorationImage(
+                              image: NetworkImage(
+                                  getDefaultImage(trip['country']!)),
+                              fit: BoxFit.cover,
+                              colorFilter: selectedIndices.contains(index)
+                                  ? ColorFilter.mode(
+                                      Colors.white.withOpacity(0.8),
+                                      BlendMode.lighten,
+                                    )
+                                  : null,
+                            ),
+                          ),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(20),
+                              gradient: LinearGradient(
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                                colors: [
+                                  Colors.transparent,
+                                  Colors.black.withOpacity(0.7),
+                                ],
+                              ),
+                            ),
+                            padding: const EdgeInsets.all(16),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  trip['country']!,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  trip['date']!,
+                                  style: const TextStyle(
+                                    color: Colors.white70,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              trip['country']!,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                              ),
+                      ),
+                      // 삭제 버튼
+                      Positioned(
+                        top: 8,
+                        right: 8,
+                        child: Container(
+                          width: 30,
+                          height: 30,
+                          decoration: BoxDecoration(
+                            color: Colors.black.withOpacity(0.5),
+                            shape: BoxShape.circle,
+                          ),
+                          child: IconButton(
+                            icon: const Icon(
+                              Icons.delete,
+                              color: Colors.white,
+                              size: 20,
                             ),
-                            const SizedBox(height: 4),
-                            Text(
-                              trip['date']!,
-                              style: const TextStyle(
-                                color: Colors.white70,
-                                fontSize: 16,
-                              ),
-                            ),
-                          ],
+                            padding: EdgeInsets.zero,
+                            onPressed: () => _deleteTrip(index),
+                            tooltip: '삭제',
+                          ),
                         ),
                       ),
-                    ),
+                    ],
                   ),
                 );
               },
@@ -368,4 +715,32 @@ class _TravelListScreenState extends State<TravelListScreen> {
     _searchController.dispose();
     super.dispose();
   }
+}
+
+// 산 모양을 그리는 CustomClipper
+class MountainClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    final path = Path();
+    path.moveTo(0, size.height); // 시작점 (왼쪽 하단)
+
+    // 첫 번째 산
+    path.lineTo(size.width * 0.25, size.height * 0.4);
+
+    // 두 번째 산
+    path.lineTo(size.width * 0.5, size.height * 0.7);
+
+    // 세 번째 산
+    path.lineTo(size.width * 0.75, size.height * 0.3);
+
+    // 오른쪽 끝
+    path.lineTo(size.width, size.height * 0.6);
+    path.lineTo(size.width, size.height);
+
+    path.close();
+    return path;
+  }
+
+  @override
+  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
 }
