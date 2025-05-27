@@ -30,7 +30,11 @@ Future<String> fetchFromGPT(String prompt) async {
     "model": "gpt-3.5-turbo",
     "messages": [
       {"role": "user", "content": prompt},
-      {"role": "system", "content": "장소 이름 + 짧은 설명 형태로, 한 문장으로만 한국어로 대답하세요."}
+      {
+        "role": "system",
+        "content":
+            "반드시 [지역이름] 형식으로 시작하고 그 뒤에 설명이 이어지는 한 문장으로 답변하세요. 예시: [파리] 에펠탑으로 유명한 프랑스의 로맨틱한 수도"
+      }
     ],
     "max_tokens": 100,
     "temperature": 0.7,
@@ -77,12 +81,12 @@ String getMapUrl(String place) {
 }
 
 String extractPlace(String response) {
-  final matches = RegExp(r"(?:[는은이의] )?([가-힣a-zA-Z]{2,20})[은는이가의]")
-      .allMatches(response)
-      .map((m) => m.group(1))
-      .where((e) => e != null && e!.length > 1)
-      .toList();
-  return matches.isNotEmpty ? matches.last! : "유럽";
+  final pattern = RegExp(r'^\[([^\]]+)\]');
+  final match = pattern.firstMatch(response);
+  if (match != null && match.group(1) != null) {
+    return match.group(1)!.trim();
+  }
+  return "유럽";
 }
 
 class TripRecumendPage extends StatefulWidget {
@@ -95,11 +99,11 @@ class _TripRecumendPageState extends State<TripRecumendPage> {
   String? recommendation;
   String? imageUrl;
   String? mapUrl;
-  String? contextIntro;
   int step = 0;
   bool isLoading = true;
   bool isTypingMode = false;
   final TextEditingController _controller = TextEditingController();
+  String? contextIntro;
 
   @override
   void initState() {
@@ -109,21 +113,21 @@ class _TripRecumendPageState extends State<TripRecumendPage> {
 
   String getPrompt() {
     if (isTypingMode) {
-      return "${_controller.text.trim()} 장소 하나만 간단히 추천 + 짧은 설명. 한 문장. 한국어.";
+      return "${_controller.text.trim()}와 관련된 여행지를 추천해주세요. [지역이름] 형식으로 시작하고 설명을 덧붙여서 한 문장으로 답변해주세요.";
     }
     switch (step) {
       case 0:
         contextIntro = "프랑스를 많이 가셨다면 이런 유럽 여행은 어떠신가요?";
-        return "유럽의 덜 알려졌지만 매력적인 여행지 한 곳을 장소 + 짧은 설명 형태로 한 문장으로 추천해주세요. 한국어로.";
+        return "유럽의 덜 알려졌지만 매력적인 여행지를 추천해주세요. [지역이름] 형식으로 시작하고 설명을 덧붙여서 한 문장으로 답변해주세요.";
       case 1:
         contextIntro = "도시 위주의 여행을 즐기셨다면, 자연은 어떠신가요?";
-        return "유럽에서 자연이 아름다운 여행지 한 곳을 장소 + 짧은 설명 형태로 한 문장으로 추천해주세요. 한국어로.";
+        return "전 세계에서 자연이 아름다운 여행지를 추천해주세요. [지역이름] 형식으로 시작하고 설명을 덧붙여서 한 문장으로 답변해주세요.";
       case 2:
         contextIntro = "프랑스 여행을 많이 하셨다니, 프랑스 한 번 더는 어떠신가요?";
-        return "프랑스의 잘 알려지지 않은 여행지 중 하나를 장소 + 짧은 설명 형태로 한 문장으로 추천해주세요. 한국어로.";
+        return "프랑스의 잘 알려지지 않은 여행지를 추천해주세요. [지역이름] 형식으로 시작하고 설명을 덧붙여서 한 문장으로 답변해주세요.";
       default:
         contextIntro = null;
-        return "재미있는 여행지 한 곳을 장소 + 짧은 설명 형태로 한 문장으로 추천해주세요. 한국어로.";
+        return "재미있는 여행지를 추천해주세요. [지역이름] 형식으로 시작하고 설명을 덧붙여서 한 문장으로 답변해주세요.";
     }
   }
 
@@ -158,82 +162,301 @@ class _TripRecumendPageState extends State<TripRecumendPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('여행지 추천')),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    if (contextIntro != null)
-                      Text(
-                        contextIntro!,
-                        style: const TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.w600),
-                      ),
-                    const SizedBox(height: 8),
-                    Text(
-                      recommendation ?? '추천 없음',
-                      style: const TextStyle(fontSize: 18),
-                    ),
-                    const SizedBox(height: 16),
-                    if (imageUrl != null)
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: Image.network(
-                          imageUrl!,
-                          height: 180,
-                          width: double.infinity,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) =>
-                              const Text('사진을 불러오지 못했습니다'),
-                        ),
-                      ),
-                    const SizedBox(height: 12),
-                    if (mapUrl != null)
-                      TextButton(
-                        onPressed: () => launchUrl(Uri.parse(mapUrl!)),
-                        child: const Text("구글 지도에서 보기 🗺️"),
-                      ),
-                    const SizedBox(height: 20),
-                    if (!isTypingMode) ...[
-                      ElevatedButton(
-                        onPressed: () {
-                          setState(() {
-                            step++;
-                          });
-                          fetchRecommendation();
-                        },
-                        child: const Text("다른 추천 보기 🔁"),
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          setState(() {
-                            isTypingMode = true;
-                          });
-                        },
-                        child: const Text("직접 검색하기 ✍️"),
-                      ),
-                    ] else ...[
-                      TextField(
-                        controller: _controller,
-                        maxLines: 1,
-                        decoration: const InputDecoration(
-                          hintText: "예) 오로라 볼 수 있는 곳",
-                          border: OutlineInputBorder(),
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      ElevatedButton(
-                        onPressed: fetchRecommendation,
-                        child: const Text("추천 받기 🚀"),
-                      ),
-                    ]
-                  ],
+      appBar: AppBar(
+        title: !isTypingMode
+            ? const Text(
+                '여행지 추천',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
                 ),
+              )
+            : TextField(
+                controller: _controller,
+                autofocus: true,
+                style: const TextStyle(color: Colors.white),
+                decoration: InputDecoration(
+                  hintText: "예) 오로라 볼 수 있는 곳",
+                  hintStyle: TextStyle(color: Colors.white.withOpacity(0.7)),
+                  border: InputBorder.none,
+                  prefixIcon: Icon(
+                    Icons.search,
+                    color: Colors.white.withOpacity(0.7),
+                  ),
+                ),
+                onSubmitted: (value) {
+                  if (value.trim().isNotEmpty) {
+                    fetchRecommendation();
+                  }
+                },
               ),
+        actions: [
+          if (!isTypingMode)
+            IconButton(
+              icon: const Icon(Icons.search, color: Colors.white),
+              onPressed: () {
+                setState(() {
+                  isTypingMode = true;
+                });
+              },
+              tooltip: '직접 검색하기',
+            )
+          else ...[
+            IconButton(
+              icon: const Icon(Icons.clear, color: Colors.white),
+              onPressed: () {
+                setState(() {
+                  isTypingMode = false;
+                  _controller.clear();
+                });
+              },
+              tooltip: '검색 취소',
+            ),
+            IconButton(
+              icon: const Icon(Icons.search, color: Colors.white),
+              onPressed: () {
+                if (_controller.text.trim().isNotEmpty) {
+                  fetchRecommendation();
+                }
+              },
+              tooltip: '검색',
+            ),
+          ],
+        ],
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Color(0xFF8B5CF6),
+                Color(0xFF7C3AED),
+              ],
+            ),
+          ),
+        ),
+        elevation: 0,
+      ),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Color(0xFFF3E8FF),
+              Colors.white,
+            ],
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: isLoading
+              ? const Center(
+                  child: CircularProgressIndicator(
+                    valueColor:
+                        AlwaysStoppedAnimation<Color>(Color(0xFF8B5CF6)),
+                  ),
+                )
+              : SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      if (!isTypingMode && contextIntro != null)
+                        Container(
+                          margin: const EdgeInsets.only(bottom: 16),
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.purple.withOpacity(0.1),
+                                blurRadius: 10,
+                                spreadRadius: 0,
+                              ),
+                            ],
+                          ),
+                          child: Text(
+                            contextIntro!,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFF6B46C1),
+                            ),
+                          ),
+                        ),
+                      AnimatedContainer(
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeInOut,
+                        margin: const EdgeInsets.symmetric(vertical: 8),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(24),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Color(0xFF8B5CF6).withOpacity(0.08),
+                              blurRadius: 24,
+                              spreadRadius: 0,
+                              offset: Offset(0, 12),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            if (imageUrl != null)
+                              Container(
+                                height:
+                                    MediaQuery.of(context).size.height * 0.45,
+                                child: Stack(
+                                  children: [
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.circular(24),
+                                      child: Stack(
+                                        children: [
+                                          Hero(
+                                            tag: 'travel_image',
+                                            child: Image.network(
+                                              imageUrl!,
+                                              height: MediaQuery.of(context)
+                                                      .size
+                                                      .height *
+                                                  0.45,
+                                              width: double.infinity,
+                                              fit: BoxFit.cover,
+                                              errorBuilder: (_, __, ___) =>
+                                                  Container(
+                                                color: Colors.grey[100],
+                                                child: const Center(
+                                                  child: Icon(
+                                                    Icons.image_not_supported,
+                                                    color: Colors.grey,
+                                                    size: 40,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                          Container(
+                                            decoration: BoxDecoration(
+                                              gradient: LinearGradient(
+                                                begin: Alignment.topCenter,
+                                                end: Alignment.bottomCenter,
+                                                colors: [
+                                                  Colors.transparent,
+                                                  Colors.black.withOpacity(0.2),
+                                                  Colors.black.withOpacity(0.6),
+                                                ],
+                                                stops: const [0.3, 0.7, 1.0],
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    if (!isTypingMode)
+                                      Positioned(
+                                        top: 20,
+                                        right: 20,
+                                        child: Material(
+                                          color: Colors.white.withOpacity(0.95),
+                                          borderRadius:
+                                              BorderRadius.circular(14),
+                                          elevation: 4,
+                                          child: InkWell(
+                                            borderRadius:
+                                                BorderRadius.circular(14),
+                                            onTap: () {
+                                              setState(() {
+                                                step++;
+                                                step %= 3;
+                                              });
+                                              fetchRecommendation();
+                                            },
+                                            child: Container(
+                                              padding: EdgeInsets.all(12),
+                                              child: Icon(
+                                                Icons.refresh_rounded,
+                                                color: Color(0xFF8B5CF6),
+                                                size: 26,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    Positioned(
+                                      left: 24,
+                                      right: 24,
+                                      bottom: 24,
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            recommendation ?? '추천 없음',
+                                            style: const TextStyle(
+                                              fontSize: 22,
+                                              height: 1.5,
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.w600,
+                                              letterSpacing: 0.3,
+                                              shadows: [
+                                                Shadow(
+                                                  offset: Offset(0, 2),
+                                                  blurRadius: 4.0,
+                                                  color: Color.fromARGB(
+                                                      130, 0, 0, 0),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            if (mapUrl != null)
+                              Padding(
+                                padding: const EdgeInsets.all(20),
+                                child: ElevatedButton.icon(
+                                  onPressed: () => launchUrl(
+                                    Uri.parse(mapUrl!),
+                                    mode: LaunchMode.externalApplication,
+                                  ),
+                                  icon: const Icon(Icons.map_outlined),
+                                  label: const Text(
+                                    "구글 지도에서 보기",
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                      letterSpacing: 0.5,
+                                    ),
+                                  ),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Color(0xFF10B981),
+                                    foregroundColor: Colors.white,
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 28,
+                                      vertical: 16,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+                                    elevation: 2,
+                                    shadowColor:
+                                        Color(0xFF10B981).withOpacity(0.4),
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                    ],
+                  ),
+                ),
+        ),
       ),
     );
   }

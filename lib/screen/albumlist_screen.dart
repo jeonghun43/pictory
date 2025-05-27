@@ -136,28 +136,12 @@ class _AlbumListState extends State<AlbumList> {
                     child: Container(
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(30),
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            Colors.white,
-                            Colors.white,
-                            const Color(0xFFF8F9FA),
-                          ],
-                          stops: const [0.0, 0.8, 1.0],
-                        ),
+                        color: Colors.white,
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.grey,
-                            blurRadius: 0.5,
-                            offset: const Offset(-1, -1),
-                            spreadRadius: 1,
-                          ),
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.3),
-                            blurRadius: 0.3,
-                            offset: const Offset(1, 1),
-                            spreadRadius: 1,
+                            color: Colors.black.withOpacity(0.1),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
                           ),
                         ],
                       ),
@@ -216,40 +200,63 @@ class _AlbumListState extends State<AlbumList> {
               ),
             ),
           ),
-          const SizedBox(height: 40),
-          const Text(
-            '당신의 여행기록을\nAI가 정리했어요!',
-            style: TextStyle(fontSize: 28, fontStyle: FontStyle.italic),
-            textAlign: TextAlign.center,
+          const SizedBox(height: 24),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  '당신의 여행기록을\nAI가 정리했어요!',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    height: 1.3,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  '${filteredCountries.length}개의 여행지',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.grey[600],
+                  ),
+                ),
+              ],
+            ),
           ),
-          const SizedBox(height: 40),
+          const SizedBox(height: 24),
           Expanded(
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(horizontal: 16),
+              physics: const BouncingScrollPhysics(),
               child: Row(
-                children: filteredCountries
-                    .map((country) => Padding(
-                          padding: const EdgeInsets.only(right: 16),
-                          child: GestureDetector(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => CountryPhotoListPage(
-                                    country: country,
-                                    photoList: countryPhotos[country] ?? [],
-                                  ),
-                                ),
-                              );
-                            },
-                            child: CountryCard(
-                              country: country,
-                              imageUrl: getDefaultImage(country),
+                children: filteredCountries.map((country) {
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 16),
+                    child: SizedBox(
+                      width: 220,
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => CountryPhotoListPage(
+                                country: country,
+                                photoList: countryPhotos[country] ?? [],
+                              ),
                             ),
-                          ),
-                        ))
-                    .toList(),
+                          );
+                        },
+                        child: CountryCard(
+                          country: country,
+                          imageUrl: getDefaultImage(country),
+                        ),
+                      ),
+                    ),
+                  );
+                }).toList(),
               ),
             ),
           ),
