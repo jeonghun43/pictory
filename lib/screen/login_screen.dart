@@ -1,8 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:pictory/auths.dart';
+import 'package:pictory/main.dart';
+import 'package:pictory/signup.dart';
 
-class LoginScreen extends StatelessWidget {
-  final TextEditingController emailController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
+class LoginScreen extends StatefulWidget {
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  final _auth = AuthService();
+  final _email = TextEditingController();
+  final _password = TextEditingController();
+
+  @override
+  void dispose() {
+    super.dispose();
+    _email.dispose();
+    _password.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -69,7 +85,7 @@ class LoginScreen extends StatelessWidget {
                         ],
                       ),
                       child: TextField(
-                        controller: emailController,
+                        controller: _email,
                         style: const TextStyle(color: Colors.white),
                         decoration: InputDecoration(
                           hintText: '아이디',
@@ -113,7 +129,7 @@ class LoginScreen extends StatelessWidget {
                         ],
                       ),
                       child: TextField(
-                        controller: passwordController,
+                        controller: _password,
                         obscureText: true,
                         style: const TextStyle(color: Colors.white),
                         decoration: InputDecoration(
@@ -154,9 +170,17 @@ class LoginScreen extends StatelessWidget {
                         ],
                       ),
                       child: ElevatedButton(
-                        onPressed: () {
-                          // TODO: 로그인 로직 구현
-                          Navigator.pop(context, true);
+                        onPressed: () async {
+                          final loginUser =
+                              await _auth.loginUserWithEmailAndPassword(
+                                  _email.text, _password.text);
+                          if (loginUser != null) {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => const HomeScreen()));
+                          }
+                          print(loginUser);
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.transparent,
@@ -195,7 +219,10 @@ class LoginScreen extends StatelessWidget {
                       ),
                       child: ElevatedButton(
                         onPressed: () {
-                          // TODO: 회원가입 페이지로 이동
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => const Signup()));
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.transparent,
